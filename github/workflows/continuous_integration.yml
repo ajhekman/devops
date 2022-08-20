@@ -1,0 +1,71 @@
+name: Continuous Integration
+
+on: push
+
+jobs:
+  linting:
+    name: Ruby Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        name: bundle install
+        with:
+          # run 'bundle install' and cache installed gems automatically
+          bundler-cache: true
+      - name: Run Zeitwerk to ensure proper module and class loading
+        run: bundle exec rails zeitwerk:check
+      # - name: Lint HAML files
+      #   run: bundle exec haml-lint --exclude-linter RuboCop,LineLength app/**/*.html.haml
+      - name: Ensure assests compile
+        run: bundle exec rails assets:precompile
+      - name: Run standardrb
+        run: bundle exec standardrb
+      - name: Run Brakeman
+        run: bundle exec brakeman
+      - uses: 8398a7/action-slack@v3
+        with:
+          job_name: Ruby Linting
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,ref,workflow,job,took # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+          MATRIX_CONTEXT: ${{ toJson(matrix) }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:alpine # Use alpine images for faster spinup
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >- # Set health checks to wait until postgres has started
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/<...>
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          # run 'bundle install' and cache installed gems automatically
+          bundler-cache: true
+      - run: bundle exec rspec
+      - uses: 8398a7/action-slack@v3
+        with:
+          job_name: Run Tests
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,ref,workflow,job,took # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+          MATRIX_CONTEXT: ${{ toJson(matrix) }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
