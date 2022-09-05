@@ -17,5 +17,5 @@ Rails 7.0.3.1 # example, doesn't have to match exactly
 ```
 *Then run the following command to create a new Rails project*
 ```bash
-rails new my_app --template https://raw.githubusercontent.com/ajhekman/devops/main/rails/rails_template.rb --rc=https://raw.githubusercontent.com/ajhekman/devops/main/rails/.railsrc
+rails new my_app --template https://raw.githubusercontent.com/ajhekman/devops/main/rails/rails_template.rb --rc https://raw.githubusercontent.com/ajhekman/devops/main/rails/.railsrc
 ```
