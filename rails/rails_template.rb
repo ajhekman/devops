@@ -122,7 +122,7 @@ create_file "Brewfile", <<~EOF
   # brew "coreutils"
 
   # Object-relational database system
-  brew "postgresql", restart_service: true
+  brew "postgresql@14", restart_service: true
 
   # Persistent key-value database, with built-in net interface
   # brew "redis", restart_service: true
