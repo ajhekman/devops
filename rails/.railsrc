@@ -1,6 +1,6 @@
---database=postgresql
+--database postgresql
 --skip-action-mailbox # no inbound mail handler
 --skip-test # skip minitest, we'll install rspec later
 --skip-jbuilder # no jbuilder gem. If creating a json api, may consider adding t
 his back in
---css=tailwind # use tailwind to process and generate css
+--css tailwind # use tailwind to process and generate css
